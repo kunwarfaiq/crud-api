@@ -7,5 +7,15 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    """Return a friendly hello message."""
-    return {"message": "Hello from the Task API!"}
+    """Return API metadata."""
+    return {
+        "name": "Task API",
+        "version": "1.0",
+        "endpoints": ["/tasks"],
+    }
+
+
+@app.get("/health")
+def health():
+    """Health-check endpoint."""
+    return {"status": "ok"}
