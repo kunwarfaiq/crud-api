@@ -70,7 +70,7 @@ HTTP/1.1 404 Not Found
 
 ## Swagger UI
 
-![Swagger UI screenshot](docs/swagger.png)
+<img width="965" height="631" alt="image" src="https://github.com/user-attachments/assets/e0184e72-c5d9-4227-8377-e292f9707fef" />
 
 ---
 
