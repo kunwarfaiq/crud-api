@@ -2,8 +2,6 @@
 
 A lightweight in-memory CRUD to-do service built with **FastAPI**.
 
-> **Note:** Stages 0-6 of this project were completely self-done as part of an internship task.
-
 ---
 
 ## Quick Start
