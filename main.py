@@ -88,9 +88,46 @@ def health():
     description="Return every task currently stored in memory.",
     responses={200: {"description": "A JSON array of task objects"}},
 )
-def list_tasks():
-    """Return every task in the store."""
-    return tasks
+def list_tasks(
+    done: bool | None = None,
+    search: str | None = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """Return every task in the store, with optional filtering and pagination."""
+    result = tasks
+    if done is not None:
+        result = [t for t in result if t["done"] == done]
+    if search:
+        search_lower = search.lower()
+        result = [t for t in result if search_lower in t["title"].lower()]
+    return result[offset:offset + limit]
+
+
+@app.get(
+    "/stats",
+    summary="Get task statistics",
+    description="Returns the total number of tasks, completed tasks, and open tasks.",
+    responses={200: {"description": "Task statistics object"}},
+)
+def get_stats():
+    """Return task statistics."""
+    total = len(tasks)
+    done_count = sum(1 for t in tasks if t["done"])
+    return {"total": total, "done": done_count, "open": total - done_count}
+
+
+@app.post(
+    "/reset",
+    summary="Reset tasks",
+    description="Restores the tasks list to the initial seed state.",
+    responses={200: {"description": "Tasks reset successfully"}},
+)
+def reset_tasks():
+    """Restores the tasks list to the initial seed state."""
+    tasks.clear()
+    tasks.extend([t.copy() for t in SEED_TASKS])
+    return {"message": "Tasks reset to initial state"}
 
 
 @app.get(
