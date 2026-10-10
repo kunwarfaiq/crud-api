@@ -1,7 +1,7 @@
 """Task API – a simple in-memory CRUD to-do service built with FastAPI."""
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 
 app = FastAPI()
@@ -108,3 +108,70 @@ async def create_task(request: Request):
     task = {"id": _next_id(), "title": title.strip(), "done": False}
     tasks.append(task)
     return JSONResponse(status_code=201, content=task)
+
+
+@app.put("/tasks/{task_id}")
+async def update_task(task_id: int, request: Request):
+    """Update title and/or done for a task. Returns the updated task."""
+    task = _find_task(task_id)
+    if task is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"},
+        )
+
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Request body must be valid JSON"},
+        )
+
+    if not isinstance(body, dict) or not body:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Request body must be a non-empty JSON object"},
+        )
+
+    # Validate fields
+    allowed = {"title", "done"}
+    unknown = set(body.keys()) - allowed
+    if unknown:
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Unknown fields: {', '.join(sorted(unknown))}"},
+        )
+
+    if "title" in body:
+        title = body["title"]
+        if not isinstance(title, str) or not title.strip():
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Field 'title' must be a non-empty string"},
+            )
+        task["title"] = title.strip()
+
+    if "done" in body:
+        done = body["done"]
+        if not isinstance(done, bool):
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Field 'done' must be a boolean"},
+            )
+        task["done"] = done
+
+    return task
+
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int):
+    """Delete a task by id. Returns 204 with no body."""
+    task = _find_task(task_id)
+    if task is None:
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"Task {task_id} not found"},
+        )
+    tasks.remove(task)
+    return Response(status_code=204)
