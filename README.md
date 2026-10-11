@@ -68,8 +68,7 @@ HTTP/1.1 404 Not Found
 
 ## Swagger UI
 
-![Swagger UI screenshot](docs/swagger.png)
-
+![Swagger UI](image.png)
 ---
 
 ## Tech Stack
